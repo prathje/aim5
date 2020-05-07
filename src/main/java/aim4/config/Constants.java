@@ -30,7 +30,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package aim4.config;
 
+
 import java.text.*;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class to hold constants for the simulator.
@@ -119,6 +123,66 @@ public final class Constants {
    * using Math.abs(a-b) < Constants.DOUBLE_EQUAL_PRECISION. {@value}
    */
   public static final double DOUBLE_EQUAL_WEAK_PRECISION = 0.000001;
+
+  /** The time buffer for edge tiles according to velocity ranges
+   *  The key is a pair of velocity ranges and the value is the edge tile time buffer size */
+  private static final Map<AbstractMap.SimpleEntry<Double, Double>, Double> MAP_VELOCITY_TO_EDGE_TILE_TIME_BUFFER = mapVelocityToEdgeTileTimeBuffer();
+
+  private static final Map<AbstractMap.SimpleEntry<Double,Double>,Double> mapVelocityToEdgeTileTimeBuffer() {
+    Map<AbstractMap.SimpleEntry<Double, Double>, Double> mapVelocityToEdgeTileTimeBuffer = new HashMap<AbstractMap.SimpleEntry<Double, Double>, Double>();
+
+    mapVelocityToEdgeTileTimeBuffer.put(new AbstractMap.SimpleEntry<>(0.0, 15.0), 0.3);
+    mapVelocityToEdgeTileTimeBuffer.put(new AbstractMap.SimpleEntry<>(15.0, 30.0), 0.5);
+    mapVelocityToEdgeTileTimeBuffer.put(new AbstractMap.SimpleEntry<>(30.0, 45.0), 0.7);
+    mapVelocityToEdgeTileTimeBuffer.put(new AbstractMap.SimpleEntry<>(45.0, 55.0), 0.9);
+    mapVelocityToEdgeTileTimeBuffer.put(new AbstractMap.SimpleEntry<>(55.0, 65.0), 1.1);
+    mapVelocityToEdgeTileTimeBuffer.put(new AbstractMap.SimpleEntry<>(65.0, 75.0), 1.3);
+    mapVelocityToEdgeTileTimeBuffer.put(new AbstractMap.SimpleEntry<>(75.0, 80.0), 1.5);
+
+    return  mapVelocityToEdgeTileTimeBuffer;
+
+  }
+
+  /** Retrieve the edge tile buffer size based on a given velocity.
+   *  Throws a runtime exception if no edge tile time buffer can be found. */
+  public static double getEdgeTileTimeBufferBasedOnVelocity(double velocity) throws Exception {
+    for (AbstractMap.SimpleEntry<Double, Double> velocityRanges : MAP_VELOCITY_TO_EDGE_TILE_TIME_BUFFER.keySet()) {
+      if (velocityRanges.getKey().doubleValue() <= velocity && velocity <= velocityRanges.getValue().doubleValue()) {
+        return MAP_VELOCITY_TO_EDGE_TILE_TIME_BUFFER.get(velocityRanges).doubleValue();
+      }
+    }
+    throw new RuntimeException(String.format("No edge tile time buffer size value could be found for the given velocity of %f.", velocity));
+  }
+
+  /** The minimum following distance according to velocity ranges
+   *  The key is a pair of velocity ranges and the value is the minimum following distance */
+  private static final Map<AbstractMap.SimpleEntry<Double, Double>, Double> MAP_VELOCITY_TO_MINIMUM_FOLLOWING_DISTANCES = mapVelocityToMinimumFollowingDistances();
+
+  private static Map<AbstractMap.SimpleEntry<Double,Double>,Double> mapVelocityToMinimumFollowingDistances() {
+    Map<AbstractMap.SimpleEntry<Double, Double>, Double> mapVelocityToMinimumFollowingDistances = new HashMap<AbstractMap.SimpleEntry<Double, Double>, Double>();
+
+    mapVelocityToMinimumFollowingDistances.put(new AbstractMap.SimpleEntry<>(0.0, 15.0), 0.5);
+    mapVelocityToMinimumFollowingDistances.put(new AbstractMap.SimpleEntry<>(15.0, 30.0), 0.6);
+    mapVelocityToMinimumFollowingDistances.put(new AbstractMap.SimpleEntry<>(30.0, 45.0), 0.9);
+    mapVelocityToMinimumFollowingDistances.put(new AbstractMap.SimpleEntry<>(45.0, 55.0), 1.1);
+    mapVelocityToMinimumFollowingDistances.put(new AbstractMap.SimpleEntry<>(55.0, 65.0), 1.2);
+    mapVelocityToMinimumFollowingDistances.put(new AbstractMap.SimpleEntry<>(65.0, 75.0), 1.3);
+    mapVelocityToMinimumFollowingDistances.put(new AbstractMap.SimpleEntry<>(75.0, 80.0), 1.5);
+
+    return  mapVelocityToMinimumFollowingDistances;
+
+  }
+
+  /** Retrieve the minimum following distance based on a given velocity.
+   *  Returns Double.MAX_VALUE */
+  public static double getMinimumFollowingDistanceBasedOnVelocity(double velocity) throws Exception {
+    for (AbstractMap.SimpleEntry<Double, Double> velocityRanges : MAP_VELOCITY_TO_MINIMUM_FOLLOWING_DISTANCES.keySet()) {
+      if (velocityRanges.getKey().doubleValue() <= velocity && velocity <= velocityRanges.getValue().doubleValue()) {
+        return MAP_VELOCITY_TO_MINIMUM_FOLLOWING_DISTANCES.get(velocityRanges).doubleValue();
+      }
+    }
+    throw new RuntimeException(String.format("No value for minimum following distances could be found for the given velocity of %f.", velocity));
+  }
 
   /**
    * The four cardinal directions: north, east, south, and west.
